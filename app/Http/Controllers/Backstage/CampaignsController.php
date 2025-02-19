@@ -34,8 +34,7 @@ class CampaignsController extends Controller
      */
     public function store(StoreRequest $request): RedirectResponse
     {
-        // Store the campaign directly using validated data
-        Campaign::create($request->validated());
+        $campaign = Campaign::create($request->validated());
 
         session()->flash('success', 'The campaign has been created!');
 
@@ -83,7 +82,34 @@ class CampaignsController extends Controller
      */
     public function use(Campaign $campaign): RedirectResponse
     {
+        if (empty($campaign->timezone)) {
+            session()->flash('error', 'This campaign does not have a valid timezone!');
+            return redirect()->route('backstage.campaigns.index');
+        }
+
+        // Check if any prize in the campaign has exhausted the daily limit
+        $prizes = $campaign->prizes;
+
+        foreach ($prizes as $prize) {
+            if ($prize->daily_limit <= 0) {
+                session()->flash('error', 'One or more prizes for this campaign have exhausted their daily limit.');
+                return redirect()->route('backstage.campaigns.index');
+            }
+        }
+
         session()->put('activeCampaign', $campaign->id);
+
+        return redirect()->route('backstage.campaigns.index');
+    }
+
+    /**
+     * Deactivate campaign
+     */
+    public function deactivate(): RedirectResponse
+    {
+        session()->forget('activeCampaign');
+
+        session()->flash('success', 'The active campaign has been deactivated!');
 
         return redirect()->route('backstage.campaigns.index');
     }

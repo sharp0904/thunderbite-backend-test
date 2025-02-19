@@ -14,4 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/flip', [ApiController::class, 'flip'])->name('api.flip');
+Route::middleware('check.campaign')->post('/flip', [ApiController::class, 'flip'])->name('api.flip');

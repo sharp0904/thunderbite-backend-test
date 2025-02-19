@@ -14,18 +14,13 @@ class SetActiveCampaign
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $activeCampaign = null;
-
-        if (session('activeCampaign')) {
-            $activeCampaign = Campaign::find(session('activeCampaign'));
-
-            if ($activeCampaign === null) {
+        if($activeCampaign = session('activeCampaign')) {
+            $activeCampaign = Campaign::find($activeCampaign);
+            if($activeCampaign === null){
                 session()->forget('activeCampaign');
             }
         }
-
-        view()->share('activeCampaign', $activeCampaign);
-
+        view()->share('activeCampaign', $activeCampaign ?? null);
         return $next($request);
     }
 }

@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'redirectIfNoActiveCampaign' => \App\Http\Middleware\RedirectIfNoActiveCampaign::class,
             'setActiveCampaign' => \App\Http\Middleware\SetActiveCampaign::class,
+            'check.campaign' => \App\Http\Middleware\CheckCampaignStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

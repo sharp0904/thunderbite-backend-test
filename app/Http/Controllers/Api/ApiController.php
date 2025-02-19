@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
+use App\Models\GameSession;
+use App\Models\Prize;
+use Illuminate\Http\Request;
 
 class ApiController extends Controller
 {
@@ -21,17 +24,43 @@ class ApiController extends Controller
          */
 
         // Simulate the current move count using cache (replace with database in production).
-        $currentMove = (Cache::get(request('gameId')) ?? 0) + 1;
-        Cache::put(request('gameId'), $currentMove);
+        $gameSession = GameSession::firstOrCreate(
+            ['user_id' => $request->user()->id, 'has_won' => false],
+            ['titles' => json_encode([])]
+        )
 
+        $tiles = $gameSession->tiles;
+        $tile = random_int(1, 7);
 
-        if ($currentMove >= 10) {
-            Cache::forget(request('gameId'));
+        $tiles[] = $tile;
+        $gameSession->tiles = $ti;
+        $gameSession->save();
+
+        $tileCounts = array_count_values($tiles);
+        $matchingTiles = array_filter($tileCounts, fn($count) => $count >= 3);
+
+        if(count($matchingTiles) > 0){
+            $prize = Prize::first();
+
+            if($prize->daily_limit > 0) {
+                $gameSession->awardPrize($prize->id);
+                return response()->json([
+                    'tileImage' => asset("assets/{$tile}.png"),
+                    'message' => 'You won! Prize:'.$prize->name,
+                    'prize' => $prize->name,
+                    'daily_limit' => $prize->daily_limit,
+                ]);
+            } else {
+                return response()->json([
+                    'tileImage' => asset("assets/{$tile}.png"),
+                    'message' => 'The prize is out of stock for today',
+                ]);
+            }
         }
 
-        // Return the next tile and a loss message if the move limit is exceeded.
-        return [
-            'tileImage' => asset('assets/'.random_int(1, 7).'.png'),
-        ] + ($currentMove >= 10 ? ['message' => 'You lost!'] : []);
+        return response()->json([
+            'tileImage' => asset("assets/{$tile}.png"),
+            'message' => 'No match yet, keep playing!',
+        ])
     }
 }

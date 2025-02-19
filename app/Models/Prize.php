@@ -16,6 +16,7 @@ class Prize extends Model
         'weight',
         'starts_at',
         'ends_at',
+        'daily_limit'
     ];
 
     protected function casts(): array
