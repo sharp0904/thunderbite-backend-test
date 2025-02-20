@@ -39,15 +39,13 @@ class Prize extends Model
         return $this->belongsTo(Campaign::class);
     }
 
-    public static function selectPrize(string $segment = null)
-    {
-        $query = static::query();
-
-        if($segment){
-            $query->where('segment', $segment);
-        }
-
-        return $query->orderByRaw('-LOG(1.0 - RAND()) / weight')->first();
+    public static function selectTile(int $campaign_id, string $segment = null)
+    {   
+        return self::where('campaign_id', $campaign_id) // Filter by campaign_id
+        ->where('segment', $segment)
+        ->where('daily_limit', '>', 0) // Ensure the prize is available today
+        ->orderByRaw('-LOG(1.0 - RAND()) / weight')
+        ->first();
     }
 
     public function isAvailableForToday(): bool

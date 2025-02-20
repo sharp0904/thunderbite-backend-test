@@ -19,6 +19,13 @@
     'value' => old('weight') ?? $prize->weight,
 ])
 
+@include('backstage.partials.forms.number', [
+    'field' => 'daily_limit',
+    'label' => 'daily_limit',
+    'step' => 1,
+    'value' => old('weight') ?? $prize->daily_limit,
+])
+
 @include('backstage.partials.forms.select', [
     'field' => 'segment',
     'label' => 'Segment',
@@ -33,6 +40,11 @@
     'maxDate' => $activeCampaign->ends_at,
 ])
 
+@include('backstage.partials.forms.images', [
+    'field' => 'image',
+    'label' => 'Prize Image',
+    'value' => old('image') ?? $prize->image,
+])
 
 @includeWhen(empty($disabled), 'backstage.partials.forms.submit')
 

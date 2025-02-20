@@ -68,7 +68,7 @@ class PrizeController extends Controller
         // Update the prize with validated data
         $data = $request->validated();
 
-        if($request->hash_file('image')) {
+        if($request->hasFile('image')) {
             if($prize->exif_imagetype) {
                 Storage::disk('public')->delete($prize->image);
             }
