@@ -26,6 +26,8 @@ class StoreRequest extends FormRequest
             'starts_at' => 'required|date_format:d-m-Y H:i:s',
             'ends_at' => 'required|date_format:d-m-Y H:i:s',
             'segment' => 'required|in:low,med,high',
+            'daily_limit' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ];
     }
 }

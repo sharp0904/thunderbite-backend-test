@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Session;
 use App\Services\CampaignService;
 
 class CheckCampaignStatus
@@ -25,17 +24,18 @@ class CheckCampaignStatus
     public function handle(Request $request, Closure $next): Response
     {
         $activeCampaignId = session('activeCampaign');
-
         // If there's no active campaign, return an error message
         if (!$activeCampaignId) {
-            return response()->json(['message' => 'No active campaign available.'], 400);
+            session()->flash('error', 'No active campaign available.');
+            return redirect()->route('backstage.campaigns.index');
         }
 
         // Use the CampaignService to check the campaign status
         $status = $this->campaignService->checkCampaignStatus($activeCampaignId);
 
         if (!$status['status']) {
-            return response()->json(['message' => $status['message']], 400);
+            session()->flash('error', $status['message']);
+            return redirect()->route('backstage.campaigns.index');
         }
 
         // If campaign is active, proceed with the request

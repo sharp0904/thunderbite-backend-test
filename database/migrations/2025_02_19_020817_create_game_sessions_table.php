@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('game_sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('campaign_id')->constrained()->onDelete('cascade');
             $table->json('tiles');
             $table->boolean('has_won')->default(false);
             $table->foreignId('prize_id')->nullable()->constrained();

@@ -60,4 +60,14 @@ class Campaign extends Model
         // Return
         return $return;
     }
+
+    public function prizes()
+    {
+        return $this->hasMany(Prize::class);
+    }
+    
+    public function gameSession()
+    {
+        return $this->hasMany(GameSession::class);
+    }
 }

@@ -16,7 +16,8 @@ class Prize extends Model
         'weight',
         'starts_at',
         'ends_at',
-        'daily_limit'
+        'daily_limit',
+        'image',
     ];
 
     protected function casts(): array
@@ -36,5 +37,25 @@ class Prize extends Model
     public function campaign(): BelongsTo
     {
         return $this->belongsTo(Campaign::class);
+    }
+
+    public static function selectPrize(string $segment = null)
+    {
+        $query = static::query();
+
+        if($segment){
+            $query->where('segment', $segment);
+        }
+
+        return $query->orderByRaw('-LOG(1.0 - RAND()) / weight')->first();
+    }
+
+    public function isAvailableForToday(): bool
+    {
+        $today = now()->toDateString();
+        $prizeWonTodayCount = GameSession::where('prize_id', $this->id)
+                            ->whereDate('created_at', $today)
+                            ->count();
+        return $prizeWonTodayCount < $this->daily_limit;
     }
 }

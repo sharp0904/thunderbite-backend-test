@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class GameSession extends Model
 {
-    protected $fillable = ['user_id', 'tiles', 'has_won', 'prize_id'];
+    protected $fillable = ['campaign_id', 'tiles', 'has_won', 'prize_id'];
 
     protected $casts = [
-        'tiles' => 'array';
+        'tiles' => 'array'
     ];
 
     public function awardPrize($prizedId){
@@ -23,4 +23,10 @@ class GameSession extends Model
         }
         $this->save();
     }
+    
+    public function campaign(): BelongsTo
+    {
+        return $this->belongsTo(Campaign::class);
+    }
+    
 }

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ApiController extends Controller
 {
-    public function flip()
+    public function flip(Request $request)
     {
         /**
          * This is a simplified example to demonstrate interaction with the provided frontend (FE).
@@ -24,43 +24,53 @@ class ApiController extends Controller
          */
 
         // Simulate the current move count using cache (replace with database in production).
-        $gameSession = GameSession::firstOrCreate(
-            ['user_id' => $request->user()->id, 'has_won' => false],
-            ['titles' => json_encode([])]
-        )
+        $gameSession = GameSession::find($request->gameId);
 
-        $tiles = $gameSession->tiles;
+        // If no game session is found or it's already won, return an error
+        if (!$gameSession || $gameSession->has_won) {
+            return response()->json([
+                'message' => 'Game session not found or already completed.',
+            ], 400);
+        }
+
+        $tiles = json_decode($gameSession->tiles, true);
+
         $tile = random_int(1, 7);
 
         $tiles[] = $tile;
-        $gameSession->tiles = $ti;
+        $gameSession->tiles = json_encode($tiles);
         $gameSession->save();
 
         $tileCounts = array_count_values($tiles);
         $matchingTiles = array_filter($tileCounts, fn($count) => $count >= 3);
 
-        if(count($matchingTiles) > 0){
-            $prize = Prize::first();
+        if (count($matchingTiles) > 0) {
+            $segment = $request->query('segment');
 
-            if($prize->daily_limit > 0) {
+            $prize = Prize::selectPrize($segment);
+            
+            // Check if the prize is still available
+            if ($prize && $prize->isAvailableForToday()) {
+                // Award the prize and update the session
                 $gameSession->awardPrize($prize->id);
                 return response()->json([
                     'tileImage' => asset("assets/{$tile}.png"),
-                    'message' => 'You won! Prize:'.$prize->name,
+                    'message' => 'You won! Prize: ' . $prize->name,
                     'prize' => $prize->name,
                     'daily_limit' => $prize->daily_limit,
+                    'prize_image' => asset("storage/prizes/{$prize->image}"),
                 ]);
             } else {
                 return response()->json([
                     'tileImage' => asset("assets/{$tile}.png"),
-                    'message' => 'The prize is out of stock for today',
+                    'message' => 'The prize is out of stock for today.',
                 ]);
             }
         }
 
+        // If there is no match yet, continue the game
         return response()->json([
             'tileImage' => asset("assets/{$tile}.png"),
-            'message' => 'No match yet, keep playing!',
-        ])
+        ]);
     }
 }

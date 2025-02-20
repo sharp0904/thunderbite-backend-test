@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Campaign;
 use App\Models\Prize;
 use Illuminate\Database\Seeder;
+use DB;
 
 class PrizeSeeder extends Seeder
 {
@@ -13,6 +14,7 @@ class PrizeSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Prize::truncate();
 
         $campaigns = Campaign::all();
@@ -24,6 +26,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'Low 1',
                     'segment' => 'low',
                     'weight' => '25.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -32,6 +35,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'Low 2',
                     'segment' => 'low',
                     'weight' => '25.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -40,6 +44,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'Low 3',
                     'segment' => 'low',
                     'weight' => '50.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -48,6 +53,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'Med 1',
                     'segment' => 'med',
                     'weight' => '25.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -56,6 +62,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'Med 2',
                     'segment' => 'med',
                     'weight' => '25.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -64,6 +71,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'Med 3',
                     'segment' => 'med',
                     'weight' => '50.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -72,6 +80,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'High 1',
                     'segment' => 'high',
                     'weight' => '25.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -80,6 +89,7 @@ class PrizeSeeder extends Seeder
                     'name' => 'High 2',
                     'segment' => 'high',
                     'weight' => '25.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
@@ -88,10 +98,13 @@ class PrizeSeeder extends Seeder
                     'name' => 'High 3',
                     'segment' => 'high',
                     'weight' => '50.00',
+                    'daily_limit' => 100,
                     'starts_at' => now()->subDays(10)->startOfDay(),
                     'ends_at' => now()->addDays(7)->endOfDay(),
                 ],
             ]);
         }
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

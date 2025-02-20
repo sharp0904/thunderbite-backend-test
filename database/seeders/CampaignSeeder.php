@@ -3,15 +3,21 @@
 namespace Database\Seeders;
 
 use App\Models\Campaign;
+use App\Models\GameSession;
 use Illuminate\Database\Seeder;
+use DB;
 
 class CampaignSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
+    
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        GameSession::truncate();
+
         Campaign::truncate();
 
         Campaign::create([
@@ -29,5 +35,7 @@ class CampaignSeeder extends Seeder
             'starts_at' => now()->startOfDay(),
             'ends_at' => now()->addDays(7)->endOfDay(),
         ]);
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
+
 }

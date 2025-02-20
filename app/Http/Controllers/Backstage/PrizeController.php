@@ -36,6 +36,11 @@ class PrizeController extends Controller
     {
         // Create the prize with validated data
         $data = $request->validated();
+        
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('prizes', 'public');
+        }
+
         $data['campaign_id'] = session('activeCampaign');
 
         Prize::create($data);
@@ -62,6 +67,13 @@ class PrizeController extends Controller
     {
         // Update the prize with validated data
         $data = $request->validated();
+
+        if($request->hash_file('image')) {
+            if($prize->exif_imagetype) {
+                Storage::disk('public')->delete($prize->image);
+            }
+            $data['image'] = $request->file('image')->store('prizes', 'public');
+        }
         $data['campaign_id'] = session('activeCampaign');
 
         $prize->update($data);
