@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Campaign;
 use Illuminate\View\View;
-use App\Models\GameSession;
+use App\Models\Game;
 use Illuminate\Http\Request;
 
 class FrontendController extends Controller
@@ -15,26 +15,18 @@ class FrontendController extends Controller
     public function loadCampaign(Campaign $campaign, Request $request): View
     {
         $campaignId = $campaign->id;
-
         $segment = $request->query('segment');
+        $account = $request->query('a');
         
         if (!$segment) {
             $segment = 'low';  // Default value if segment is not present in the URL
         }
-        
-        $gameSession = GameSession::where('campaign_id', $campaignId)->where('has_won', false)->first();
-        
-        if (!$gameSession) {
-            $gameSession = GameSession::create([
-                'campaign_id' => $campaignId, // Set the campaign_id
-                'tiles' => json_encode([]), // Initialize the tiles as an empty array
-                'has_won' => false, // Mark the game as not won
-                'segment_type' => $segment, 
-            ]);
-        }
+
+        $game = Game::createOrFindGame($campaignId, $segment, $account);
+
         $config = [
             'apiPath' => '/api/flip',
-            'gameId' => $gameSession->id, // Use the dynamically generated gameId
+            'gameId' => $game->id, // Use the dynamically generated gameId
             'revealedTiles' => [[
                 'index' => 0,
                 'image' => '/assets/1.png'

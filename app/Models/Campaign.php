@@ -65,9 +65,4 @@ class Campaign extends Model
     {
         return $this->hasMany(Prize::class);
     }
-    
-    public function gameSession()
-    {
-        return $this->hasMany(GameSession::class);
-    }
 }

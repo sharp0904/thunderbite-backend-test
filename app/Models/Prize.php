@@ -51,7 +51,7 @@ class Prize extends Model
     public function isAvailableForToday(): bool
     {
         $today = now()->toDateString();
-        $prizeWonTodayCount = GameSession::where('prize_id', $this->id)
+        $prizeWonTodayCount = Game::where('prize_id', $this->id)
                             ->whereDate('created_at', $today)
                             ->count();
         return $prizeWonTodayCount < $this->daily_limit;

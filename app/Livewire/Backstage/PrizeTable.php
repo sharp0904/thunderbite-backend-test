@@ -27,6 +27,11 @@ class PrizeTable extends TableComponent
             ],
 
             [
+                'title' => 'daily_limit',
+                'sort' => true,
+            ],
+
+            [
                 'title' => 'starts_at',
                 'sort' => true,
             ],

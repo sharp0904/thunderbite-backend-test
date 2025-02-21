@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
-use App\Models\GameSession;
+use App\Models\Game;
 use App\Models\Prize;
 use Illuminate\Http\Request;
 
@@ -24,39 +24,50 @@ class ApiController extends Controller
          */
 
         // Simulate the current move count using cache (replace with database in production).
-        $gameSession = GameSession::find($request->gameId);
-        $segment_type = $gameSession->segment_type;
-        $campaign_id = $gameSession->campaign_id;
-
+        $game = Game::find($request->gameId);
+        $segment_type = $game->segment_type;
+        $campaign_id = $game->campaign_id;
         $tile_index = $request->tileIndex;
-
-        
         // If no game session is found or it's already won, return an error
-        if (!$gameSession || $gameSession->has_won) {
+        if (!$game || $game->has_won || $game->has_lost) {
             return response()->json([
-                'message' => 'Game session not found or already completed.',
+                'message' => 'Game not found or already completed.',
             ], 400);
         }
-
-        $tiles = json_decode($gameSession->tiles, true);
-
+        $tiles = json_decode($game->tiles, true);
+        $existingTile = collect($tiles)->firstWhere('index', $tile_index);
+        if ($existingTile) {
+            // If tile already exists, return its image
+            return response()->json([
+                'tileImage' => asset("storage/{$existingTile['image']}"),
+            ]);
+        }
         $prize = Prize::selectTile($campaign_id, $segment_type);
-
         $tiles[] = [
             'index' => $tile_index,
             'image' => $prize->image
         ];
-        $gameSession->tiles = json_encode($tiles);
-        $gameSession->save();
-
+        if (count($tiles) >= 25) {
+            // Mark the game as lost and update the session
+            $game->has_lost = true; // Set the has_lost flag to true
+            $game->revealed_at = now();
+            $game->save();
+            return response()->json([
+                'message' => 'Game over! You lost the game. You reached the maximum number of tiles.',
+            ], 400);
+        }
+        $game->tiles = json_encode($tiles);
+        $game->revealed_at = now();
+        $game->save();
         $tileCounts = array_count_values(array_column($tiles, 'image'));
         $matchingTiles = array_filter($tileCounts, fn($count) => $count >= 3);
-
         if (count($matchingTiles) > 0) {
             // Check if the prize is still available
             if ($prize && $prize->isAvailableForToday()) {
                 // Award the prize and update the session
-                $gameSession->awardPrize($prize->id);
+                $game->prize_id = $prize->id;
+                $game->has_won = true;
+                $game->save();
                 return response()->json([
                     'tileImage' => asset("storage/{$prize->image}"),
                     'message' => 'You won! Prize: ' . $prize->name,
@@ -71,7 +82,6 @@ class ApiController extends Controller
                 ]);
             }
         }
-
         // If there is no match yet, continue the game
         return response()->json([
             'tileImage' => asset("storage/{$prize->image}"),

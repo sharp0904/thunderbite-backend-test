@@ -9,5 +9,14 @@
             icon: 'success'
         });
     @endif
+    @if( Session::has('error') )
+        swal({
+            title: "Error!",
+            text: "{{ Session::get('error') }}",
+            timer: 2000,
+            button: false,
+            icon: 'error'
+        });
+    @endif
 
 </script>

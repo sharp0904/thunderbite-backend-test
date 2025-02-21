@@ -62,4 +62,10 @@ class User extends Authenticatable
             : static::where('name', 'like', '%'.$query.'%')
                 ->orWhere('email', 'like', '%'.$query.'%');
     }
+
+    public static function findNameByID($id)
+    {
+        $user = static::find($id);
+        return $user ? $user->name : null;
+    }
 }
